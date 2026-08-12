@@ -1,5 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include "lexer.h"
 #include "token.h"
@@ -16,6 +20,42 @@ void print_tokens(Token tokens[], int token_count)
                    i,
                    tokens[i].value);
         }
+        else if (tokens[i].type == TOKEN_PIPE)
+        {
+            printf("%d : PIPE    %s\n",
+                   i,
+                   tokens[i].value);
+        }
+        else if (tokens[i].type == TOKEN_REDIRECT_IN)
+        {
+            printf("%d : REDIR_IN %s\n",
+                   i,
+                   tokens[i].value);
+        }
+        else if (tokens[i].type == TOKEN_REDIRECT_OUT)
+        {
+            printf("%d : REDIR_OUT %s\n",
+                   i,
+                   tokens[i].value);
+        }
+        else if (tokens[i].type == TOKEN_REDIRECT_APPEND)
+        {
+            printf("%d : REDIR_APPEND %s\n",
+                   i,
+                   tokens[i].value);
+        }
+        else if (tokens[i].type == TOKEN_AND)
+        {
+            printf("%d : AND     %s\n",
+                   i,
+                   tokens[i].value);
+        }
+        else if (tokens[i].type == TOKEN_OR)
+        {
+            printf("%d : OR      %s\n",
+                   i,
+                   tokens[i].value);
+        }
         else if (tokens[i].type == TOKEN_END)
         {
             printf("%d : END     END\n",
@@ -28,10 +68,7 @@ void print_tokens(Token tokens[], int token_count)
 
 int main()
 {
-    char input[1024];
-
     Token tokens[MAX_TOKENS];
-
     int token_count;
 
     printf("====================================\n");
@@ -41,34 +78,39 @@ int main()
 
     while (1)
     {
-        printf("shellforge$ ");
-        fflush(stdout);
+        char *input = readline("shellforge$ ");
 
-        if (fgets(input, sizeof(input), stdin) == NULL)
+        /* Ctrl+D */
+        if (input == NULL)
         {
+            printf("\n");
             break;
         }
 
-        /* Remove newline */
-        input[strcspn(input, "\n")] = '\0';
+        /* Ignore empty commands */
+        if (strlen(input) == 0)
+        {
+            free(input);
+            continue;
+        }
 
         /* Exit shell */
         if (strcmp(input, "exit") == 0)
         {
+            free(input);
             break;
         }
 
-        /* Ignore empty input */
-        if (strlen(input) == 0)
-        {
-            continue;
-        }
+        /* Save command in history */
+        add_history(input);
 
         /* Tokenize input */
         lexer_tokenize(input, tokens, &token_count);
 
         /* Display tokens */
         print_tokens(tokens, token_count);
+
+        free(input);
     }
 
     return 0;

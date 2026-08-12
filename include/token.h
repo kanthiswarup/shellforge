@@ -6,6 +6,12 @@
 typedef enum
 {
     TOKEN_WORD,
+    TOKEN_PIPE,
+    TOKEN_REDIRECT_IN,
+    TOKEN_REDIRECT_OUT,
+    TOKEN_REDIRECT_APPEND,
+    TOKEN_AND,
+    TOKEN_OR,
     TOKEN_END
 } TokenType;
 
