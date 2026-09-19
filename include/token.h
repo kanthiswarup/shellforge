@@ -12,6 +12,7 @@ typedef enum
     TOKEN_REDIRECT_APPEND,
     TOKEN_AND,
     TOKEN_OR,
+    TOKEN_BACKGROUND,
     TOKEN_END
 } TokenType;
 
@@ -20,5 +21,7 @@ typedef struct
     TokenType type;
     char value[MAX_TOKEN_LENGTH];
 } Token;
+
+void token_print(Token tokens[], int token_count);
 
 #endif

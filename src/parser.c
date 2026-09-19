@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <string.h>
+#include "parser.h"
+
+void command_init(command_t *cmd) {
+    cmd->argc = 0;
+    cmd->input[0]  = '\0';
+    cmd->output[0] = '\0';
+    cmd->append = 0;
+    cmd->background = 0;
+    for (int i = 0; i < MAX_ARGS; i++)
+        cmd->argv[i] = NULL;
+}
+
+int parse(Token tokens[], int token_count, pipeline_t *pipeline) {
+    pipeline->command_count = 1;
+    int current = 0;
+    command_init(&pipeline->commands[current]);
+
+    int i = 0;
+    while (i < token_count) {
+        Token *t = &tokens[i];
+
+        switch (t->type) {
+            case TOKEN_WORD:
+                if (pipeline->commands[current].argc >= MAX_ARGS - 1) {
+                    printf("Error: Too many arguments.\n");
+                    return 0;
+                }
+                pipeline->commands[current].argv[pipeline->commands[current].argc++] = t->value;
+                i++;
+                break;
+
+            case TOKEN_REDIRECT_IN:
+                if (i + 1 < token_count && tokens[i + 1].type == TOKEN_WORD) {
+                    strncpy(pipeline->commands[current].input, tokens[i + 1].value, MAX_PATH - 1);
+                    pipeline->commands[current].input[MAX_PATH - 1] = '\0';
+                    i += 2;
+                } else {
+                    printf("Error: filename expected after <\n");
+                    return 0;
+                }
+                break;
+
+            case TOKEN_REDIRECT_OUT:
+                if (i + 1 < token_count && tokens[i + 1].type == TOKEN_WORD) {
+                    strncpy(pipeline->commands[current].output, tokens[i + 1].value, MAX_PATH - 1);
+                    pipeline->commands[current].output[MAX_PATH - 1] = '\0';
+                    pipeline->commands[current].append = 0;
+                    i += 2;
+                } else {
+                    printf("Error: filename expected after >\n");
+                    return 0;
+                }
+                break;
+
+            case TOKEN_REDIRECT_APPEND:
+                if (i + 1 < token_count && tokens[i + 1].type == TOKEN_WORD) {
+                    strncpy(pipeline->commands[current].output, tokens[i + 1].value, MAX_PATH - 1);
+                    pipeline->commands[current].output[MAX_PATH - 1] = '\0';
+                    pipeline->commands[current].append = 1;
+                    i += 2;
+                } else {
+                    printf("Error: filename expected after >>\n");
+                    return 0;
+                }
+                break;
+
+            case TOKEN_BACKGROUND:
+                pipeline->commands[current].background = 1;
+                i++;
+                break;
+
+            case TOKEN_PIPE:
+                pipeline->commands[current].argv[pipeline->commands[current].argc] = NULL;
+                current++;
+                if (current >= MAX_COMMANDS) {
+                    printf("Error: Too many commands in pipeline.\n");
+                    return 0;
+                }
+                command_init(&pipeline->commands[current]);
+                pipeline->command_count++;
+                i++;
+                break;
+
+            case TOKEN_END:
+            default:
+                i++;
+                break;
+        }
+    }
+
+    pipeline->commands[current].argv[pipeline->commands[current].argc] = NULL;
+    return 1;
+}
+
+void pipeline_print(const pipeline_t *pipeline) {
+    printf("========== PIPELINE ==========\n");
+    for (int i = 0; i < pipeline->command_count; i++) {
+        const command_t *cmd = &pipeline->commands[i];
+        printf("\nCommand %d\n", i + 1);
+        printf("--------------------------------\n");
+        printf("Arguments\n");
+        for (int j = 0; j < cmd->argc; j++)
+            printf("argv[%d] = %s\n", j, cmd->argv[j]);
+        printf("Input      : %s\n", cmd->input[0]  ? cmd->input  : "None");
+        printf("Output     : %s\n", cmd->output[0] ? cmd->output : "None");
+        printf("Append     : %s\n", cmd->append     ? "Yes" : "No");
+        printf("Background : %s\n", cmd->background ? "Yes" : "No");
+    }
+    printf("===============================\n");
+}
