@@ -1,0 +1,10 @@
+total 52
+-rw-r--r-- 1 kanthi kanthi   202 Jul 29 16:34 Makefile
+drwxr-xr-x 2 kanthi kanthi  4096 Aug  5 09:09 docs
+drwxr-xr-x 2 kanthi kanthi  4096 Aug 19 08:59 include
+-rw-r--r-- 1 kanthi kanthi   268 Aug 19 08:51 makefile
+-rw-r--r-- 1 kanthi kanthi     0 Sep 21 12:23 output.txt
+-rwxr-xr-x 1 kanthi kanthi 20976 Sep 21 12:22 shellforge
+drwxr-xr-x 2 kanthi kanthi  4096 Aug 19 09:03 src
+drwxr-xr-x 2 kanthi kanthi  4096 Aug  5 09:09 tests
+-rw-r--r-- 1 kanthi kanthi   210 Aug 12 08:40 token.h
